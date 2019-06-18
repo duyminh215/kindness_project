@@ -14,3 +14,7 @@ def return_json(f):
         r = f(*args, **kwargs)
         return Response(r, content_type='application/json; charset=utf-8')
     return decorated_function
+
+def correct_phone(phone):
+    
+    return phone

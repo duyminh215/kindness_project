@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # db_config.py
-host = '192.168.10.11'
+host = 'localhost'
 port = '3306'
-db_name = 'vh2utest'
+db_name = 'kindness_db'
 user = 'root'
-password = 'root'
+password = 'duyminh'
