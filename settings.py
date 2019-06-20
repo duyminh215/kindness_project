@@ -6,7 +6,7 @@ from . import db_configs
 
 class Config(object):
 
-    DEBUG = False
+    DEBUG = True
     TESTING = False
 
 

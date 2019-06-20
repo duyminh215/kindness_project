@@ -1,8 +1,6 @@
 # coding: utf-8
 from sqlalchemy import Column, Date, Index, String, text
 from sqlalchemy.dialects.mysql import BIGINT, INTEGER, LONGTEXT
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import scoped_session, sessionmaker
 from .extensions import db
 
 class ActionCategory(db.Model):
@@ -195,6 +193,7 @@ class UserDevice(db.Model):
     user_id = Column(BIGINT(20))
     push_token = Column(String(4500))
     device_id = Column(String(64))
+    inserted_time = Column(BIGINT(20))
 
 
 class UserStory(db.Model):
@@ -207,5 +206,5 @@ class UserStory(db.Model):
     status = Column(INTEGER(11))
     created_time = Column(BIGINT(20))
     number_of_like = Column(INTEGER(11), nullable=False, server_default=text("'0'"))
-    numer_of_dislike = Column(INTEGER(11), nullable=False, server_default=text("'0'"))
+    number_of_dislike = Column(INTEGER(11), nullable=False, server_default=text("'0'"))
     number_of_comment = Column(INTEGER(11), nullable=False, server_default=text("'0'"))

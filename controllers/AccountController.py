@@ -26,12 +26,25 @@ def login():
 
     if existed_account is None:
         raise InvalidUsage(error_messages.user_not_found)
-    
+
     existed_user = utils.row2dict(existed_account)
     if existed_user['password'] != password:
         raise InvalidUsage(error_messages.password_not_match)
-    if existed_user['password'] == password:
-        session[server_constants.session_key] = existed_user
+
+    push_token = request.headers.get(header_constant.push_token)
+    unique_device_id = request.headers.get(header_constant.unique_device_id)
+
+    existed_account.push_token = push_token
+    existed_account.device_id = unique_device_id
+
+    same_device_users = User.query.filter_by(device_id=unique_device_id).all()
+    if same_device_users:
+        for user in same_device_users:
+            user.device_id = ""
+
+    db.session.commit()
+
+    session[server_constants.session_key] = existed_user
 
     return json.dumps(existed_user)
 
@@ -55,30 +68,34 @@ def signup():
 
     push_token = request.headers.get(header_constant.push_token)
     unique_device_id = request.headers.get(header_constant.unique_device_id)
+    try:
+        user = User()
+        user.full_name = full_name
+        user.created_time = time.time()
+        user.updated_time = time.time()
+        user.push_token = push_token
+        user.device_id = unique_device_id
+        user.password = password
+        if utils.is_valid_email(input):
+            user.email = input
+        else:
+            user.phone = input
 
-    user = User()
-    user.full_name = full_name
-    user.password = password
-    user.created_time = time.time()
-    user.updated_time = time.time()
-    user.push_token = push_token
-    user.device_id = unique_device_id
-    if utils.is_valid_email(input):
-        user.email = input
-    else:
-        user.phone = input
-
-    db.session.add(user)
-    db.session.commit()
-
-    return json.dumps(utils.row2dict(user))
+        db.session.add(user)
+        db.session.commit()
+        return json.dumps(utils.row2dict(user))
+    except Exception as e:
+        db.session.rollback()
+        raise InvalidUsage(error_messages.internal_server_error)
 
 @account_api.route('/user/info')
 @login_required
 @return_json
 def get_user_info():
     user_session_info = session[server_constants.session_key]
-    return json.dumps(user_session_info)
+    user_info_result = User.query.filter_by(id=user_session_info['id']).first()
+    user_info = utils.row2dict(user_info_result)
+    return json.dumps(user_info)
 
 
 @account_api.route('/logout')
