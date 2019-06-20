@@ -113,19 +113,19 @@ def react_story():
         story_reaction.reaction_id = reaction_id
         story_reaction.user_id = user_session_info['id']
         story_reaction.reaction_time = time.time()
-        story_reaction.status = 0
+        story_reaction.status = '0'
 
         db.session.add(story_reaction)
         db.session.flush()
 
         if reaction_id == server_constants.action_like:
-            number_of_like = user_story_dict['number_of_like']
+            number_of_like = int(user_story_dict['number_of_like'])
             number_of_like = number_of_like + 1
 
             user_story.number_of_like = number_of_like
 
         if reaction_id == server_constants.action_dislike:
-            number_of_dislike = user_story_dict['number_of_dislike']
+            number_of_dislike = int(user_story_dict['number_of_dislike'])
             number_of_dislike = number_of_dislike + 1
 
             user_story.number_of_dislike = number_of_dislike
