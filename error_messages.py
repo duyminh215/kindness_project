@@ -14,3 +14,4 @@ user_story_not_found={'message':"Câu chuyện không tồn tại", 'error_code'
 follower_not_found={'message':"Người dùng không tồn tại", 'error_code':1002, 'status_code': 400}
 following_yourself={'message':"Bạn không thể tự theo dõi chính mình", 'error_code':1002, 'status_code': 400}
 followed_user={'message':"Bạn đã theo dõi người này", 'error_code':1002, 'status_code': 400}
+story_not_found={'message':"Câu chuyện không tồn tại", 'error_code':1002, 'status_code': 400}

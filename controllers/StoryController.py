@@ -2,6 +2,7 @@ from flask import Blueprint
 from flask import request, session
 from ..models import User, UserStory, Image, StoryImage, StoryAction, StoryReaction, StoryComment
 import json
+from sqlalchemy import desc
 from ..utils import return_json, login_required
 from ..InvalidUsage import InvalidUsage
 from .. import utils
@@ -173,3 +174,83 @@ def comment_story():
         print(e)
         db.session.rollback()
         raise InvalidUsage(error_messages.internal_server_error)
+
+
+@story_api.route('/story/detail')
+@return_json
+def get_story_detail():
+    story_id = request.args.get('story_id')
+    story_result = UserStory.query.filter_by(id=story_id).first()
+    if not story_result:
+        raise InvalidUsage(error_messages.story_not_found)
+
+    user_story = utils.row2dict(story_result)
+    story_creator_result = User.query.filter_by(id=user_story['user_id']).first()
+    story_creator = utils.row2dict(story_creator_result)
+
+    user_session_info = None
+    if server_constants.session_key in session:
+        user_session_info = session[server_constants.session_key]
+
+    current_user_id = 0
+    is_login = False
+    if user_session_info:
+        is_login = True
+        current_user_id = user_session_info['id']
+
+    story_react = StoryReaction.query\
+        .filter_by(story_id=story_id)\
+        .filter_by(user_id=current_user_id).first()
+
+    story_reaction = ""
+    if story_react:
+        story_react = utils.row2dict(story_react)
+        story_reaction = story_react['reaction_id']
+
+    response = {'user_story': user_story, 'story_creator': story_creator,
+                'is_login': is_login, 'reaction': story_reaction, 'story_reaction': story_react}
+
+    return json.dumps(response)
+
+
+@story_api.route('/story/comments')
+@return_json
+def get_story_comment():
+    story_id = request.args.get('story_id')
+    start_number = 0
+    if 'start' in request.args:
+        start_number = request.args.get('start')
+    length = 10
+    if 'length' in request.args:
+        length = request.args.get('length')
+
+    to_number = start_number + length
+
+    story_comments_result = StoryComment.query\
+        .filter_by(story_id=story_id).order_by(desc(StoryComment.commented_time)).slice(start_number, to_number)
+
+    number_of_comment = StoryComment.query.filter_by(story_id=story_id).count()
+
+    story_comments = []
+    comment_user_ids = []
+    for comment in story_comments_result:
+        story_comment = utils.row2dict(comment)
+        story_comments.append(story_comment)
+        comment_user_ids.append(story_comment['user_id'])
+
+    comment_users_result = User.query.filter(User.id.in_(comment_user_ids))
+    comment_users_dict = {}
+    if comment_users_result:
+        for comment_user in comment_users_result:
+            comment_user = utils.row2dict(comment_user)
+            comment_users_dict[comment_user['id']] = comment_user
+
+    comments = []
+    for comment in story_comments:
+        commented_user = comment_users_dict[comment['user_id']]
+        data = {'comment': comment, 'commented_user': commented_user}
+        comments.append(data)
+
+    response = {'comments': comments, 'number_of_comment': number_of_comment}
+
+    return json.dumps(response)
