@@ -181,6 +181,7 @@ class User(db.Model):
     google_id = Column(String(64), unique=True)
     apple_id = Column(String(64), unique=True)
     birthday = Column(Date)
+    is_confirm_follower = Column(INTEGER(11))
 
 
 class UserDevice(db.Model):

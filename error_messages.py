@@ -11,3 +11,6 @@ empty_user_story_title={'message':"Bạn chưa nhập tiêu đề", 'error_code'
 empty_user_story_content={'message':"Bạn chưa nhập nội dung", 'error_code':1008, 'status_code': 400}
 reaction_story_not_found={'message':"Tương tác không tồn tại", 'error_code':1008, 'status_code': 400}
 user_story_not_found={'message':"Câu chuyện không tồn tại", 'error_code':1008, 'status_code': 400}
+follower_not_found={'message':"Người dùng không tồn tại", 'error_code':1002, 'status_code': 400}
+following_yourself={'message':"Bạn không thể tự theo dõi chính mình", 'error_code':1002, 'status_code': 400}
+followed_user={'message':"Bạn đã theo dõi người này", 'error_code':1002, 'status_code': 400}

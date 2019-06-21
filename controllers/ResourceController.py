@@ -1,11 +1,11 @@
 from flask import Blueprint
-from flask import request, session
 import json
 from ..models import ClientSetting, ServerSetting
 from .. import utils
 from ..utils import return_json
 
 resource_api = Blueprint('resource_api_', __name__)
+
 
 @resource_api.route('/client/settings')
 @return_json

@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask import request, session
-from ..models import User, UserStory, Image, StoryImage, StoryAction, StoryReaction
+from ..models import User, UserStory, Image, StoryImage, StoryAction, StoryReaction, StoryComment
 import json
 from ..utils import return_json, login_required
 from ..InvalidUsage import InvalidUsage
@@ -11,6 +11,7 @@ from ..extensions import db
 from .. import server_constants
 
 story_api = Blueprint('story_api', __name__)
+
 
 @story_api.route('/story/create', methods=['POST'])
 @login_required
@@ -95,9 +96,6 @@ def react_story():
     story_id = json_data['story_id']
     reaction_id = json_data['reaction_id']
 
-    # import pdb
-    # pdb.set_trace()
-
     if reaction_id != server_constants.action_like and reaction_id != server_constants.action_dislike:
         raise InvalidUsage(error_messages.reaction_story_not_found)
 
@@ -105,7 +103,6 @@ def react_story():
     if not user_story:
         raise InvalidUsage(error_messages.user_story_not_found)
     user_story_dict = utils.row2dict(user_story)
-
 
     try:
         story_reaction = StoryReaction()
@@ -133,6 +130,45 @@ def react_story():
         db.session.commit()
 
         return json.dumps(utils.row2dict(story_reaction))
+    except Exception as e:
+        print(e)
+        db.session.rollback()
+        raise InvalidUsage(error_messages.internal_server_error)
+
+
+@story_api.route('/story/comment', methods=['POST'])
+@login_required
+@return_json
+def comment_story():
+    json_data = request.json
+    user_session_info = session[server_constants.session_key]
+    story_id = json_data['story_id']
+    comment_content = json_data['content']
+
+    user_story = UserStory.query.filter_by(id=story_id).first()
+    if not user_story:
+        raise InvalidUsage(error_messages.user_story_not_found)
+    user_story_dict = utils.row2dict(user_story)
+
+    try:
+        story_comment = StoryComment()
+        story_comment.story_id = story_id
+        story_comment.content = comment_content
+        story_comment.user_id = user_session_info['id']
+        story_comment.commented_time = time.time()
+        story_comment.status = '0'
+
+        db.session.add(story_comment)
+        db.session.flush()
+
+        number_of_comment = int(user_story_dict['number_of_comment'])
+        number_of_comment = number_of_comment + 1
+
+        user_story.number_of_comment = number_of_comment
+
+        db.session.commit()
+
+        return json.dumps(utils.row2dict(user_story))
     except Exception as e:
         print(e)
         db.session.rollback()

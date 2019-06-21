@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask import request, session
-from ..models import User
+from ..models import User, Following
 import json
 from ..utils import return_json, login_required
 from ..InvalidUsage import InvalidUsage
@@ -12,6 +12,7 @@ from ..extensions import db
 from .. import server_constants
 
 account_api = Blueprint('account_api', __name__)
+
 
 @account_api.route('/login/', methods=['POST'])
 @return_json
@@ -88,6 +89,7 @@ def signup():
         db.session.rollback()
         raise InvalidUsage(error_messages.internal_server_error)
 
+
 @account_api.route('/user/info')
 @login_required
 @return_json
@@ -95,6 +97,49 @@ def get_user_info():
     user_session_info = session[server_constants.session_key]
     user_info_result = User.query.filter_by(id=user_session_info['id']).first()
     user_info = utils.row2dict(user_info_result)
+    return json.dumps(user_info)
+
+
+@account_api.route('/user/follow', methods=['POST'])
+@login_required
+@return_json
+def follow_user():
+    user_session_info = session[server_constants.session_key]
+    user_info_result = User.query.filter_by(id=user_session_info['id']).first()
+
+    json_data = request.json
+    follower_id = json_data['follower_id']
+
+    follower_user = User.query.filter_by(id=follower_id).first()
+    if not follower_user:
+        raise InvalidUsage(error_messages.follower_not_found)
+
+    user_info = utils.row2dict(user_info_result)
+    follower_user = utils.row2dict(follower_user)
+    if user_info['id'] == follower_user['id']:
+        raise InvalidUsage(error_messages.following_yourself)
+
+    existed_following = Following().query\
+        .filter_by(user_id=user_session_info['id'])\
+        .filter_by(following_user_id=follower_id).first()
+
+    if existed_following:
+        return json.dumps(user_info)
+
+    follow_status = server_constants.following_status_done
+    if int(follower_user['is_confirm_follower']) == server_constants.is_confirm_following_yes:
+        follow_status = server_constants.following_status_requesting
+
+    following = Following()
+    following.user_id = user_session_info['id']
+    following.following_user_id = follower_user['id']
+    following.inserted_time = time.time()
+    following.status = follow_status
+    following.updated_time = time.time()
+
+    db.session.add(following)
+    db.session.commit()
+
     return json.dumps(user_info)
 
 
