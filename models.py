@@ -209,3 +209,14 @@ class UserStory(db.Model):
     number_of_like = Column(INTEGER(11), nullable=False, server_default=text("'0'"))
     number_of_dislike = Column(INTEGER(11), nullable=False, server_default=text("'0'"))
     number_of_comment = Column(INTEGER(11), nullable=False, server_default=text("'0'"))
+
+
+class KindnessFeed(db.Model):
+    __tablename__ = 'kindness_feed'
+
+    id = Column(BIGINT(20), primary_key=True)
+    user_id = Column(BIGINT(20))
+    source_user_id = Column(BIGINT(20))
+    item_id = Column(BIGINT(20))
+    item_type = Column(String(32))
+    inserted_time = Column(BIGINT(20), nullable=False, server_default=text("'0'"))

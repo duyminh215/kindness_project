@@ -8,3 +8,5 @@ is_confirm_following_no = 0
 
 following_status_done = 1
 following_status_requesting = 0
+
+number_of_feed_item_per_page = 15

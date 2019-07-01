@@ -1,7 +1,9 @@
 from flask import jsonify
 
+
 class InvalidUsage(Exception):
     status_code = 400
+
     def __init__(self, error_message, payload=None):
         Exception.__init__(self)
         self.message = error_message['message']
