@@ -19,7 +19,9 @@ feed_api = Blueprint('feed_api', __name__)
 @login_required
 @return_json
 def get_feed():
-    page = int(request.args.get('page'))
+    page = 1
+    if 'page' in request.args:
+        page = int(request.args.get('page'))
 
     length = server_constants.number_of_feed_item_per_page
     start_number = (page - 1) * length
