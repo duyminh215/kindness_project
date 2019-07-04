@@ -14,6 +14,12 @@ def row2dict(row):
     return d
 
 
+def user_array_to_dict(user_array):
+    d = {'id': str(user_array[0]), 'full_name': user_array[1], 'avatar': user_array[2]}
+
+    return d
+
+
 def return_json(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):

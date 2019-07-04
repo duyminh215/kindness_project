@@ -3,6 +3,7 @@ from flask import request, session
 from ..models import KindnessFeed, User, UserStory, Image, StoryImage, StoryAction, StoryReaction, StoryComment
 import json
 from sqlalchemy import desc
+from sqlalchemy.orm import load_only
 from ..utils import return_json, login_required
 from ..InvalidUsage import InvalidUsage
 from .. import utils
@@ -82,10 +83,11 @@ def get_feed():
         source_user_ids.append(story_item['user_id'])
 
     users_dict = {}
-    users_result = User.query.filter(User.id.in_(source_user_ids))
+    users_result = User.query.with_entities(User.id, User.full_name, User.avatar).filter(User.id.in_(source_user_ids))
     for item in users_result:
-        user_item = utils.row2dict(item)
+        user_item = utils.user_array_to_dict(item)
         users_dict[user_item['id']] = user_item
+        print(users_dict)
 
     feeds_data = []
     for item in feed_items:
