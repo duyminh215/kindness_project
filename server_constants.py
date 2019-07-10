@@ -11,3 +11,11 @@ following_status_requesting = 0
 
 number_of_feed_item_per_page = 15
 user_info_display = ['id', 'full_name', 'avatar']
+
+images_storage_file_path = "/home/minhnd/Documents/study/flask/kindness_project/storages/images"
+public_images_storage_path = "http://localhost:5000/storages/images"
+
+image_prefix_name = "pic_"
+
+ALLOWED_EXTENSIONS = set(['.png', '.jpg', '.jpeg', '.gif'])
+

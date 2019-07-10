@@ -1,9 +1,11 @@
 from flask import Response
 from functools import wraps
-from flask import request, session, flash
+from flask import session, flash
 from . import server_constants, error_messages, InvalidUsage
 import re
 import json
+import datetime
+import os
 
 
 def row2dict(row):
@@ -48,3 +50,14 @@ def is_valid_email(email):
 def correct_phone(phone):
     
     return phone
+
+
+def get_date_yymmdd():
+    x = datetime.datetime.now()
+    return x.strftime("%Y%m%d")
+
+
+def get_time_yymmddHHMMSSff():
+    x = datetime.datetime.now()
+    return x.strftime("%Y%m%d%H%M%S%f")
+

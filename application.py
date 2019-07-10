@@ -10,6 +10,7 @@ from .controllers.NoteController import note_api
 from .controllers.ResourceController import resource_api
 from .controllers.StoryController import story_api
 from .controllers.FeedController import feed_api
+from .test.TestController import test_api
 from .InvalidUsage import InvalidUsage
 from flask import jsonify
 
@@ -64,6 +65,7 @@ def configure_blueprints(app):
     app.register_blueprint(resource_api)
     app.register_blueprint(story_api)
     app.register_blueprint(feed_api)
+    app.register_blueprint(test_api)
 
 
 app = create_app(config['development'])
