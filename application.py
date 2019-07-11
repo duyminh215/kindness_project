@@ -4,7 +4,7 @@ from flask import render_template
 import json
 from .settings import DevelopmentConfig
 from .settings import config
-from .extensions import db
+from .extensions import db, ma
 from .controllers.AccountController import account_api
 from .controllers.NoteController import note_api
 from .controllers.ResourceController import resource_api
@@ -41,6 +41,7 @@ def configure_app(app, config):
 def configure_extensions(app):
 
     db.init_app(app)
+    ma.init_app(app)
 
 
 def configure_logging(app):

@@ -57,6 +57,25 @@ def get_feed():
         if feed_item['item_type'] == feed_item_types.type_react_story:
             react_ids.append(feed_item['item_id'])
 
+    story_images_result = StoryImage.query.join(Image, StoryImage.image_id == Image.id)\
+        .with_entities(StoryImage.story_id, Image.id, Image.title, Image.description, Image.image_link, Image.created_time, Image.user_id)\
+        .filter(StoryImage.story_id.in_(story_ids))
+
+    story_id_and_picture_map = {}
+
+    for story_image in story_images_result:
+        story_image = story_image._asdict()
+        story_id = story_image['story_id']
+
+        if story_id in story_id_and_picture_map:
+            images_array = story_id_and_picture_map[story_id]
+            images_array.append(story_image)
+            story_id_and_picture_map[story_id] = images_array
+        else:
+            images_array = []
+            images_array.append(story_image)
+            story_id_and_picture_map[story_id] = images_array
+
     story_comments_result = StoryComment.query.filter(StoryComment.id.in_(comment_ids))
     story_comments_dict = {}
     for item in story_comments_result:
@@ -87,33 +106,42 @@ def get_feed():
     for item in users_result:
         user_item = utils.user_array_to_dict(item)
         users_dict[user_item['id']] = user_item
-        print(users_dict)
 
     feeds_data = []
     for item in feed_items:
         if item['item_type'] == feed_item_types.type_create_story or \
                 item['item_type'] == feed_item_types.type_suggest_story:
             story_item = stories_dict[item['item_id']]
+            story_images = []
+            if item['item_id'] in story_id_and_picture_map:
+                story_images = story_id_and_picture_map[item['item_id']]
+
             creator_of_story = users_dict[story_item['user_id']]
-            feed_data = {'story': story_item, 'creator': creator_of_story, 'data_type': item['item_type']}
+            feed_data = {'story': story_item, 'creator': creator_of_story,
+                         'data_type': item['item_type'], 'story_images': story_images}
 
         if item['item_type'] == feed_item_types.type_react_story:
             reaction_item = story_reactions_dict[item['item_id']]
             story_item = stories_dict[reaction_item['story_id']]
+            story_images = []
+            if reaction_item['story_id'] in story_id_and_picture_map:
+                story_images = story_id_and_picture_map[reaction_item['story_id']]
             creator_of_story = users_dict[story_item['user_id']]
             reaction_user = users_dict[reaction_item['user_id']]
 
             feed_data = {'story': story_item, 'creator': creator_of_story, 'data_type': item['item_type'],
-                         'reaction': reaction_item, 'reaction_user': reaction_user}
+                         'reaction': reaction_item, 'reaction_user': reaction_user, 'story_images': story_images}
 
         if item['item_type'] == feed_item_types.type_comment_story:
             comment_item = story_comments_dict[item['item_id']]
             story_item = stories_dict[comment_item['story_id']]
+            if comment_item['story_id'] in story_id_and_picture_map:
+                story_images = story_id_and_picture_map[comment_item['story_id']]
             creator_of_story = users_dict[story_item['user_id']]
             commented_user = users_dict[comment_item['user_id']]
 
             feed_data = {'story': story_item, 'creator': creator_of_story, 'data_type': item['item_type'],
-                         'comment': comment_item, 'commented_user': commented_user}
+                         'comment': comment_item, 'commented_user': commented_user, 'story_images': story_images}
 
         feeds_data.append(feed_data)
 

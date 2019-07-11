@@ -1,8 +1,17 @@
 # coding: utf-8
-from sqlalchemy import Column, Date, Index, String, text
+from sqlalchemy import Column, Date, Index, String, text, ForeignKey
 from sqlalchemy.dialects.mysql import BIGINT, INTEGER, LONGTEXT
-from .extensions import db
+from .extensions import db, ma
 
+def add_schema(cls):
+    class Schema(ma.ModelSchema):
+        class Meta:
+            model = cls
+    cls.Schema = Schema
+    return cls
+
+
+@add_schema
 class ActionCategory(db.Model):
     __tablename__ = 'action_category'
     __table_args__ = (
@@ -14,6 +23,7 @@ class ActionCategory(db.Model):
     category_id = Column(INTEGER(11))
 
 
+@add_schema
 class Category(db.Model):
     __tablename__ = 'category'
 
@@ -28,6 +38,7 @@ class Category(db.Model):
     used_for_filter = Column(INTEGER(11))
 
 
+@add_schema
 class ClientSetting(db.Model):
     __tablename__ = 'client_setting'
 
@@ -37,6 +48,7 @@ class ClientSetting(db.Model):
     value = Column(String(5000))
 
 
+@add_schema
 class CommentImage(db.Model):
     __tablename__ = 'comment_image'
     __table_args__ = (
@@ -49,6 +61,7 @@ class CommentImage(db.Model):
     created_time = Column(BIGINT(20), nullable=False)
 
 
+@add_schema
 class Following(db.Model):
     __tablename__ = 'following'
     __table_args__ = (
@@ -63,6 +76,7 @@ class Following(db.Model):
     updated_time = Column(BIGINT(20))
 
 
+@add_schema
 class Image(db.Model):
     __tablename__ = 'image'
 
@@ -72,8 +86,10 @@ class Image(db.Model):
     image_link = Column(String(255), nullable=False)
     status = Column(INTEGER(11), nullable=False, server_default=text("'0'"))
     created_time = Column(BIGINT(20), nullable=False, server_default=text("'0'"))
+    user_id = Column(BIGINT(20), nullable=False, server_default=text("'0'"))
 
 
+@add_schema
 class KindnessAction(db.Model):
     __tablename__ = 'kindness_action'
 
@@ -84,6 +100,7 @@ class KindnessAction(db.Model):
     created_time = Column(BIGINT(20))
 
 
+@add_schema
 class KindnessActionImage(db.Model):
     __tablename__ = 'kindness_action_image'
     __table_args__ = (
@@ -96,6 +113,7 @@ class KindnessActionImage(db.Model):
     created_time = Column(BIGINT(20))
 
 
+@add_schema
 class ServerSetting(db.Model):
     __tablename__ = 'server_setting'
 
@@ -105,6 +123,7 @@ class ServerSetting(db.Model):
     value = Column(String(5000))
 
 
+@add_schema
 class StoryAction(db.Model):
     __tablename__ = 'story_action'
     __table_args__ = (
@@ -117,6 +136,7 @@ class StoryAction(db.Model):
     created_time = Column(BIGINT(20))
 
 
+@add_schema
 class StoryComment(db.Model):
     __tablename__ = 'story_comment'
 
@@ -128,6 +148,7 @@ class StoryComment(db.Model):
     status = Column(INTEGER(11))
 
 
+@add_schema
 class StoryImage(db.Model):
     __tablename__ = 'story_image'
     __table_args__ = (
@@ -136,10 +157,11 @@ class StoryImage(db.Model):
 
     id = Column(BIGINT(20), primary_key=True)
     story_id = Column(BIGINT(20))
-    image_id = Column(BIGINT(20))
+    image_id = Column(BIGINT(20), ForeignKey('image.id'))
     inserted_time = Column(BIGINT(20))
 
 
+@add_schema
 class StoryReaction(db.Model):
     __tablename__ = 'story_reaction'
     __table_args__ = (
@@ -154,6 +176,7 @@ class StoryReaction(db.Model):
     status = Column(INTEGER(11), nullable=False, server_default=text("'0'"))
 
 
+@add_schema
 class SuggestKindnessAction(db.Model):
     __tablename__ = 'suggest_kindness_action'
 
@@ -163,6 +186,7 @@ class SuggestKindnessAction(db.Model):
     inserted_time = Column(BIGINT(20), nullable=False)
 
 
+@add_schema
 class User(db.Model):
     __tablename__ = 'user'
 
@@ -184,6 +208,7 @@ class User(db.Model):
     is_confirm_follower = Column(INTEGER(11))
 
 
+@add_schema
 class UserDevice(db.Model):
     __tablename__ = 'user_device'
     __table_args__ = (
@@ -197,6 +222,7 @@ class UserDevice(db.Model):
     inserted_time = Column(BIGINT(20))
 
 
+@add_schema
 class UserStory(db.Model):
     __tablename__ = 'user_story'
 
@@ -211,6 +237,7 @@ class UserStory(db.Model):
     number_of_comment = Column(INTEGER(11), nullable=False, server_default=text("'0'"))
 
 
+@add_schema
 class KindnessFeed(db.Model):
     __tablename__ = 'kindness_feed'
 

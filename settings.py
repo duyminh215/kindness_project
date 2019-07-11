@@ -30,7 +30,7 @@ class DevelopmentConfig(Config):
 
     # datebase
     SQLALCHEMY_DATABASE_URI = 'mysql://' + db_configs.user + ':' + db_configs.password + '@' + db_configs.host + ":" + db_configs.port + '/' + db_configs.db_name
-    SQLALCHEMY_ECHO = True
+    SQLALCHEMY_ECHO = False
 
 
 class TestingConfig(Config):
