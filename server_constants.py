@@ -19,3 +19,5 @@ image_prefix_name = "pic_"
 
 ALLOWED_EXTENSIONS = set(['.png', '.jpg', '.jpeg', '.gif'])
 
+kindness_action_status_active = 1
+kindness_action_status_inactive = 0

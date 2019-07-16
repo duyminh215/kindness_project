@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask import request, session
-from ..models import KindnessFeed, User, UserStory, Image, StoryImage, StoryAction, StoryReaction, StoryComment
+from ..models import KindnessFeed, User, UserStory, Image, StoryImage, StoryShare, StoryReaction, StoryComment
 import json
 from sqlalchemy import desc
 from sqlalchemy.orm import load_only
@@ -40,6 +40,7 @@ def get_feed():
     comment_ids = []
     react_ids = []
     source_user_ids = []
+    sharing_ids = []
     feed_items = []
 
     for item in feed_items_result:
@@ -56,6 +57,8 @@ def get_feed():
 
         if feed_item['item_type'] == feed_item_types.type_react_story:
             react_ids.append(feed_item['item_id'])
+        if feed_item['item_type'] == feed_item_types.type_share_story:
+            sharing_ids.append(feed_item['item_id'])
 
     story_images_result = StoryImage.query.join(Image, StoryImage.image_id == Image.id)\
         .with_entities(StoryImage.story_id, Image.id, Image.title, Image.description, Image.image_link, Image.created_time, Image.user_id)\
@@ -65,7 +68,7 @@ def get_feed():
 
     for story_image in story_images_result:
         story_image = story_image._asdict()
-        story_id = story_image['story_id']
+        story_id = str(story_image['story_id'])
 
         if story_id in story_id_and_picture_map:
             images_array = story_id_and_picture_map[story_id]
@@ -75,6 +78,15 @@ def get_feed():
             images_array = []
             images_array.append(story_image)
             story_id_and_picture_map[story_id] = images_array
+
+    share_story_results = StoryShare.query.filter(StoryShare.id.in_(sharing_ids))
+    story_share_dict = {}
+    for item in share_story_results:
+        share_item = utils.row2dict(item)
+        story_share_dict[share_item['id']] = share_item
+
+        story_ids.append(share_item['story_id'])
+        source_user_ids.append(share_item['user_id'])
 
     story_comments_result = StoryComment.query.filter(StoryComment.id.in_(comment_ids))
     story_comments_dict = {}
@@ -142,6 +154,17 @@ def get_feed():
 
             feed_data = {'story': story_item, 'creator': creator_of_story, 'data_type': item['item_type'],
                          'comment': comment_item, 'commented_user': commented_user, 'story_images': story_images}
+
+        if item['item_type'] == feed_item_types.type_share_story:
+            share_item = story_share_dict[item['item_id']]
+            story_item = stories_dict[share_item['story_id']]
+            if share_item['story_id'] in story_id_and_picture_map:
+                story_images = story_id_and_picture_map[share_item['story_id']]
+            creator_of_story = users_dict[story_item['user_id']]
+            sharing_user = users_dict[share_item['user_id']]
+
+            feed_data = {'story': story_item, 'creator': creator_of_story, 'data_type': item['item_type'],
+                         'sharing': share_item, 'sharing_user': sharing_user, 'story_images': story_images}
 
         feeds_data.append(feed_data)
 

@@ -247,3 +247,27 @@ class KindnessFeed(db.Model):
     item_id = Column(BIGINT(20))
     item_type = Column(String(32))
     inserted_time = Column(BIGINT(20), nullable=False, server_default=text("'0'"))
+
+
+class StoryShare(db.Model):
+    __tablename__ = 'story_share'
+    __table_args__ = (
+        Index('idx_user_share_story', 'story_id', 'user_id'),
+    )
+
+    id = Column(BIGINT(20), primary_key=True)
+    story_id = Column(BIGINT(20), nullable=False)
+    user_id = Column(BIGINT(20), nullable=False)
+    comment = Column(String(4500))
+    shared_time = Column(BIGINT(20), nullable=False, server_default=text("'0'"))
+    status = Column(INTEGER(11), nullable=False, server_default=text("'0'"))
+
+class UserKindnessActivity(db.Model):
+    __tablename__ = 'user_kindness_activity'
+
+    id = Column(BIGINT(20), primary_key=True)
+    user_id = Column(BIGINT(20), nullable=False)
+    kindness_action_id = Column(BIGINT(20))
+    activity_title = Column(String(450))
+    activity_content = Column(LONGTEXT)
+    action_time = Column(BIGINT(20), nullable=False, server_default=text("'0'"))

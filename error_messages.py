@@ -18,3 +18,4 @@ story_not_found={'message':"Câu chuyện không tồn tại", 'error_code':1002
 action_404_not_found={'message':"Câu chuyện không tồn tại", 'error_code':44044, 'status_code': 404}
 invalid_file={'message':"File không hợp lệ", 'error_code':44044, 'status_code': 404}
 extension_not_allowed={'message':"Kiểu file không được hỗ trợ", 'error_code':44044, 'status_code': 404}
+kindness_action_title_empty={'message':"Bạn phải nhập tiêu đề của hành động", 'error_code':44044, 'status_code': 404}
